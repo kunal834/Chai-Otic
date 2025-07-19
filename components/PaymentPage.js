@@ -30,11 +30,13 @@ const PaymentPage = ({username}) => {
   }
   const getData = async (params) =>{
     let u = fetchuser(username)
+   
     setcurrentuser(u)
     let dbpayments = await fetchpayments(username)
+   
     setpayments(dbpayments)
   
-}
+} 
 
 
     const pay = async (amount)=>{
@@ -74,15 +76,15 @@ const PaymentPage = ({username}) => {
         
 {/* we can't use import razorpay method in client because in that way it will be in server page 
 so in client page we import it using Script */}
-<Script src="https://checkout.razorpay.com/v1/checkout.js"></Script>
+<Script src="https://checkout.razorpay.com/v1/checkout.js"></Script> 
 
-   <div  className='cover w-full bg-red-50 relative'>
+   <div  className='cover w-full  relative'>
      
           <img className='object-cover w-full h-[350px]  'src= "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/1180182/4f15af89878e46ad8697936c5b65e637/eyJ3IjoxNjAwLCJ3ZSI6MX0%3D/3.png?token-hash=AK34Jc221ZWl2iMmLwmmdfRvNjqoqwol77A7BvTdIik%3D&token-time=1754265600" alt="" />
 
           <div className='absolute -bottom-14  right-[47%] border-white border-2 rounded-full p-2'>
             <img width={88} height={88} className='rounded-full p-1' src="https://cdn.pixabay.com/photo/2024/01/25/06/56/gaming-logo-8531082_1280.png"alt="" />
-            
+
 
           </div>
         </div>

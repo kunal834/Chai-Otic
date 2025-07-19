@@ -1,5 +1,5 @@
 "use server"
-import Razorpay from "razorpay"
+import Razorpay from "razorpay"  // by npm i razorpay
 import Payment from "@/models/Payment"
 import connectDb from "@/db/connectDB"
 import User from "@/models/User"
@@ -17,16 +17,6 @@ export const initiate = async(amount , to_user, paymentform) =>{
      key_secret: process.env.NEXT_PUBLIC_KEY_SECRET 
     })
     
-// instance.orders.create({
-// amount: amount,
-// currency: "INR",
-// receipt: "receipt#1",
-// notes: {
-//     key1: "value3",
-//     key2: "value2"
-// }
-//})
-
 let options = {
     amount: Number.parseInt(amount),
     currency: "INR"
