@@ -36,16 +36,9 @@ const Dashboard = () => {
     }
     const handlesubmit = async (e) =>{
     //   e.preventDefault();
-    //   const formData = new FormData(e.target);
+      const formData = new FormData(e.target);
         update()
-     let result =  await updateProfile(e  , session.user.username)
-    //     if (result?.error) {
-    //     alert(result.error);
-    // } else {
-    //     alert("Profile updated");
-        
-    // }
-
+     let result =  await updateProfile(formData  , session.user.username)
 
         alert("profile updated")
     }
@@ -54,7 +47,7 @@ const Dashboard = () => {
   return (
         <div className='container mx-auto p-8  md:p-0 md:py-5'>
             <h1 className='text-center font-bold text-2xl my-5'>Welcome to the dashboard</h1>
-            <form  className='max-w-2xl mx-auto'  onSubmit={handlesubmit}>
+            <form  className='max-w-2xl mx-auto'  action={handlesubmit}>
                 <div className='my-2'>
                         <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
                         <input value={form.name ? form.name : ""} onChange={handleChange} type="text" name='name' id="name" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />

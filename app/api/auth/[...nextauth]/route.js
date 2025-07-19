@@ -35,6 +35,9 @@ export const authoptions = {
           const newUser = new User({
             email: user.email,
             username: user.email.split("@")[0],
+           razorpayid: NEXT_PUBLIC_KEY_ID,
+         razorpaysecret: NEXT_PUBLIC_KEY_SECRET,
+            
 
           })
           await newUser.save()  // Save to Database 

@@ -36,7 +36,7 @@ return x
 }
 
 
-// for fetching user to detail to show who pays how much
+//for fetching user to detail to show who pays how much
 export const fetchuser = async(username) => {
     await connectDb()
   
@@ -47,6 +47,7 @@ export const fetchuser = async(username) => {
     
     
 }
+
 
 // to fetch payment amount
 export const fetchpayments = async(username) => {
@@ -62,6 +63,7 @@ export const updateProfile  = async(data,oldusername)=>{
     
     let  ndata = Object.fromEntries(data)  //Object.fromEntries() takes an iterable of key-value pairs (like an array or a FormData object) and turns it into a plain JavaScript object.
     // if the username is being updated , check if username is available 
+   console.log(ndata)
     if(oldusername !== ndata.username){
         let u = await User.findOne({username: ndata.username})
     if(u){
@@ -71,9 +73,11 @@ export const updateProfile  = async(data,oldusername)=>{
 
 }
 
-    await User.updateOne({email: ndata.email}, ndata)
+    let updated = await User.updateOne({email: ndata.email}, { $set: ndata })
+    console.log(updated)
   
 }
+
 export default initiate
 
 
