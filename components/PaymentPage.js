@@ -131,9 +131,9 @@ so in client page we import it using Script */}
 
             {/* or choose below amount  */}
             <div className='flex gap-2 mt-5'>
-              <button  type='button' className='bg-slate-600 p-3 rounded-lg ' onClick={()=> pay(200)}> pay ₹2</button>
-              <button  type='button' className='bg-slate-600 p-3 rounded-lg ' onClick={()=>pay(800)}> pay ₹8</button>
-              <button  type='button' className='bg-slate-600 p-3 rounded-lg ' onClick={()=> pay(1000)}> pay ₹10</button>
+              <button  type='button' className='bg-slate-600 p-3 rounded-lg ' onClick={()=> pay(2)}> pay ₹2</button>
+              <button  type='button' className='bg-slate-600 p-3 rounded-lg ' onClick={()=>pay(8)}> pay ₹8</button>
+              <button  type='button' className='bg-slate-600 p-3 rounded-lg ' onClick={()=> pay(10)}> pay ₹10</button>
 
             </div>
 
