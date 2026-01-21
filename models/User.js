@@ -8,8 +8,8 @@ const UserSchema = new Schema({
     coverpic: {type:String,default:'' },
     razorpayid: {type:String,default:''},
     razorpaysecret: {type:String ,default:''},
-    // createdAt: { type: Date , default: Date.now},
-    // updatedAt: { type: Date , default: Date.now },
+    createdAt: { type: Date , default: Date.now},
+    updatedAt: { type: Date , default: Date.now },
     
 } ,{ timestamps: true })
 

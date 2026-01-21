@@ -1,98 +1,124 @@
 "use client"
-import React , { useEffect , useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession, signIn , signOut} from "next-auth/react"
-import { fetchuser, fetchpayments, updateProfile } from '@/actions/useractions'
-
-
+import { useSession } from "next-auth/react"
+import { fetchuser, updateProfile } from '@/actions/useractions'
 
 const Dashboard = () => {
-    //session is undefined at first
-    const {data : session , update} = useSession() //update is a method if something changed in form refresh
+    const { data: session, status, update } = useSession() 
     const router = useRouter()
-    const [form, setform] = useState({})
+    const [form, setForm] = useState({})
+    const [loading, setLoading] = useState(true)
 
-
-   
-    // document.title = "Dashboard - Chai-Otic"
     useEffect(() => {
-         if (!session) return;  //with useeffect  session run first which it gives undefined after that it look after the exact code    
-        getData()
-      
-      return () => {
-       if(!session){
-        router.push("/Login")
-       }
-      }
-    }, [router,session])
+        if (status === "loading") return;
+        if (status === "unauthenticated") {
+            router.push("/Login")
+        }
+        if (status === "authenticated" && session?.user?.name) {
+            getData()
+        }
+    }, [status, router, session])
 
-    const getData = async () =>{
-        if (!session?.user?.name) return //with useeffect  session run first which it gives undefined after that it look after the exact code    
-        let o = await fetchuser(session.user.name) // user define by nextAuth   
-        setform(o)
-    }
-    const handleChange = (e) =>{
-        setform({...form , [e.target.name]:e.target.value})
-    }
-    const handlesubmit = async (e) =>{
-    //   e.preventDefault();
-      const formData = new FormData(e.target);
-        update()
-     let result =  await updateProfile(formData  , session.user.username)
-
-        alert("profile updated")
+    const getData = async () => {
+        try {
+            let user = await fetchuser(session.user.name) 
+            setForm(user)
+        } catch (error) {
+            console.error("Error fetching user:", error)
+        } finally {
+            setLoading(false)
+        }
     }
 
-    {/*action={handlesubmit}  */}
-  return (
-        <div className='container mx-auto p-8  md:p-0 md:py-5'>
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value })
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault(); 
+        
+        // CRITICAL FIX: Create a clean object with ONLY the fields allowed to update.
+        // If we send 'form' directly, it includes '_id' which causes a Database Crash.
+        let updateData = {
+            name: form.name,
+            username: form.username,
+            profilepic: form.profilepic,
+            razorpayid: form.razorpayid,
+            razorpaysecret: form.razorpaysecret,
+        }
+
+        try {
+            await updateProfile(updateData, session.user.username) 
+             
+            await update({
+                ...session,
+                user: {
+                    ...session.user,
+                    name: form.name 
+                }
+            })
+            
+            alert("Profile Updated Successfully!")
+            router.refresh() 
+        } catch (error) {
+            alert("Update Failed")
+            console.error(error)
+        }
+    }
+
+    if (status === "loading" || loading) {
+        return <div className="p-10 text-center">Loading Dashboard...</div>
+    }
+
+    return (
+        <div className='container mx-auto p-8 md:p-0 md:py-5'>
             <h1 className='text-center font-bold text-2xl my-5'>Welcome to the dashboard</h1>
-            <form  className='max-w-2xl mx-auto'  action={handlesubmit}>
+            
+            <form className='max-w-2xl mx-auto' onSubmit={handleSubmit}> 
+                
+                {/* NAME */}
                 <div className='my-2'>
-                        <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
-                        <input value={form.name ? form.name : ""} onChange={handleChange} type="text" name='name' id="name" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                    </div>
-                    {/* input for email */}
-                    <div className="my-2">
-                        <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
-                        <input value={form.email ? form.email : ""} onChange={handleChange} type="email" name='email' id="email" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                    </div>
-                    {/* input forusername */}
-                    <div className='my-2'>
-                        <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
-                        <input value={form.username ? form.username : ""} onChange={handleChange} type="text" name='username' id="username" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                    </div>
-                    {/* input for profile picture of input type text */}
-                    <div className="my-2">
-                        <label htmlFor="profilepic" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Profile Picture</label>
-                        <input value={form.profilepic ? form.profilepic : ""} onChange={handleChange} type="text" name='profilepic' id="profilepic" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                    </div>
-                     {/* input for cover pic  */}
-                    <div className="my-2">
-                        <label htmlFor="coverpic" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cover Picture</label>
-                        <input value={form.coverpic ? form.coverpic : ""} onChange={handleChange} type="text" name='coverpic' id="coverpic" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                    </div>
-                    {/* input razorpay id */}
-                    <div className="my-2">
-                        <label htmlFor="razorpayid" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Razorpay Id</label>
-                        <input value={form.razorpayid ? form.razorpayid : ""} onChange={handleChange} type="text" name='razorpayid' id="razorpayid" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                    </div>
-                    {/* input razorpay secret */}
-                    <div className="my-2">
-                        <label htmlFor="razorpaysecret" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Razorpay Secret</label>
-                        <input value={form.razorpaysecret ? form.razorpaysecret : ""} onChange={handleChange} type="text" name='razorpaysecret' id="razorpaysecret" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-                    </div>
+                    <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+                    <input value={form.name || ""} onChange={handleChange} type="text" name='name' id="name" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs" />
+                </div>
 
-                    {/* Submit Button  */}
-                    <div className="my-6">
-                        <button type="submit" className="block w-full p-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:ring-blue-500 focus:ring-4 focus:outline-none   dark:focus:ring-blue-800 font-medium text-sm">Save</button>
-                    </div>
+                {/* EMAIL (Read-Only) */}
+                <div className="my-2">
+                    <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+                    <input value={form.email || ""} onChange={handleChange} type="email" name='email' id="email" readOnly className="block w-full p-2 text-gray-500 border border-gray-300 rounded-lg bg-gray-200 text-xs cursor-not-allowed" />
+                </div>
+
+                {/* USERNAME */}
+                <div className='my-2'>
+                    <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
+                    <input value={form.username || ""} onChange={handleChange} type="text" name='username' id="username" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs" />
+                </div>
+
+                {/* PROFILE PIC */}
+                <div className="my-2">
+                    <label htmlFor="profilepic" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Profile Picture URL</label>
+                    <input value={form.profilepic || ""} onChange={handleChange} type="text" name='profilepic' id="profilepic" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs" />
+                </div>
+
+                {/* RAZORPAY KEY */}
+                <div className="my-2">
+                    <label htmlFor="razorpayid" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Razorpay ID</label>
+                    <input value={form.razorpayid || ""} onChange={handleChange} type="text" name='razorpayid' id="razorpayid" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs" />
+                </div>
+
+                {/* RAZORPAY SECRET */}
+                <div className="my-2">
+                    <label htmlFor="razorpaysecret" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Razorpay Secret</label>
+                    <input value={form.razorpaysecret || ""} onChange={handleChange} type="password" name='razorpaysecret' id="razorpaysecret" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs" />
+                </div>
+
+                <div className="my-6">
+                    <button type="submit" className="block w-full p-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 font-medium text-sm">Save Profile</button>
+                </div>
             </form>
-
         </div>
-      
-   
-  )
+    )
 }
 
 export default Dashboard

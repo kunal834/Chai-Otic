@@ -1,14 +1,7 @@
 import NextAuth from 'next-auth'
-// import AppleProvider from 'next-auth/providers/apple'
-// import FacebookProvider from 'next-auth/providers/facebook'
-// import GoogleProvider from 'next-auth/providers/google'
-//  
 import GitHubProvider from "next-auth/providers/github";
-// import mongoose from 'mongoose';
 import connectDb from '@/db/connectDB';
 import User from '@/models/User';
-//import Payment from '@/models/Payment';
-
 
 export const authoptions = {
   providers: [
@@ -17,51 +10,49 @@ export const authoptions = {
       clientSecret: process.env.GITHUB_SECRET
     }),
   ],
+  
+  // Make sure to use a secret for NextAuth itself (required for production)
+  secret: process.env.NEXTAUTH_SECRET,
 
-
-
-  // sign in callback to store the data of users after sign in 
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       if (account.provider == "github") {
-        // connect to the database '  
         await connectDb()
 
-        //Check if the user already exists in the datatbase 
+        // Check if user exists
         const currentuser = await User.findOne({ email: user.email })
 
         if (!currentuser) {
-          // Create a new User
-          const newUser = new User({
-            email: user.email,
-            username: user.email.split("@")[0],
-           razorpayid: NEXT_PUBLIC_KEY_ID,
-         razorpaysecret: NEXT_PUBLIC_KEY_SECRET,
-            
+          // Create new user
+          const newUser = await User.create({
+  email: user.email,
+  username: user.email.split("@")[0],
+  razorpayid: process.env.NEXT_PUBLIC_KEY_ID, 
+  razorpaysecret: process.env.KEY_SECRET,
+})
 
-          })
-          await newUser.save()  // Save to Database 
-          user.name = newUser.username  // user This is the object provided by NextAuth in the signIn() callback:
-        }
-        else {
+          user.name = newUser.username
+        } else {
           user.name = currentuser.username
         }
         return true;
-
       }
+      return false; // Return false if provider is not github
+    },
 
+    // ADD THIS: This passes the username to the Frontend (Dashboard)
+    async session({ session }) {
+      // Find user in DB to get the latest username
+      await connectDb()
+      const dbUser = await User.findOne({ email: session.user.email })
+      if (dbUser) {
+        session.user.name = dbUser.username
+        session.user.username = dbUser.username
+      }
+      return session
     }
   }
-
-
 }
 
-
-
-
-
-
 const handler = NextAuth(authoptions)
-
 export { handler as GET, handler as POST }
-

@@ -6,35 +6,37 @@ import User from "@/models/User"
 
 
 
-export const initiate = async(amount , to_user, paymentform) =>{
-    // connection to database 
+export const initiate = async (amount, to_user, paymentform) => {
     await connectDb()
     
-
-    // get it from razorpay integration docs 
-  var instance = new Razorpay({
-     key_id:process.env.NEXT_PUBLIC_KEY_ID,
-     key_secret: process.env.NEXT_PUBLIC_KEY_SECRET 
+    // FIX 1: Use the secure variable name (KEY_SECRET)
+    var instance = new Razorpay({
+        key_id: process.env.NEXT_PUBLIC_KEY_ID, // Public ID is fine here
+        key_secret: process.env.KEY_SECRET        // Must use the PRIVATE secret
     })
+
+    // FIX 2: Razorpay takes amount in Paise (1 Rupee = 100 Paise)
+    // We explicitly convert to integer to avoid decimal errors
+    let amountInPaise = Number.parseInt(amount) * 100 
+
+    let options = {
+        amount: amountInPaise, 
+        currency: "INR"
+    }
+
+    let x = await instance.orders.create(options) 
     
-let options = {
-    amount: Number.parseInt(amount),
-    currency: "INR"
+    // Create the pending payment in DB
+    await Payment.create({
+        orderID: x.id, 
+        amount: amount, // Store the RUPEE value in your DB for readability
+        to_user: to_user, 
+        name: paymentform.name, 
+        message: paymentform.message
+    })
+
+    return x    
 }
-//.create() — it is a method provided by the Razorpay SDK for Node.js.
-
-let x = await instance.orders.create(options)   //orders is a property of the Razorpay instance that lets you access Razorpay's Orders API.
-// create a payment object which shows a pending payment 
-await Payment.create({orderID: x.id, 
-    amount: amount, 
-    to_user: to_user, 
-    name:paymentform.name , 
-    message: paymentform.message})
-
-  
-return x    
-}
-
 
 //for fetching user to detail to show who pays how much
 export const fetchuser = async(username) => {
@@ -58,26 +60,30 @@ export const fetchpayments = async(username) => {
     return p
 }
 
-export const updateProfile  = async(data,oldusername)=>{
+export const updateProfile = async (data, oldusername) => {
     await connectDb()
+     
+    // CHANGE: 'data' is already a plain object now. We don't need to convert it.
+    let ndata = data; 
     
-    let  ndata = Object.fromEntries(data)  //Object.fromEntries() takes an iterable of key-value pairs (like an array or a FormData object) and turns it into a plain JavaScript object.
-    // if the username is being updated , check if username is available 
-   console.log(ndata)
-    if(oldusername !== ndata.username){
-        let u = await User.findOne({username: ndata.username})
-    if(u){
-        return {error: "username already exists"}
+    console.log("Updated User:", ndata) // Good for debugging
+    console.log("data" , data)
+
+    // 1. Check if username is being changed (and if the new one is taken)
+    if (oldusername !== ndata.username) {
+        let u = await User.findOne({ username: ndata.username })
+        if (u) {
+            return { error: "Username already exists" }
+        }
     }
 
+    // 2. Update the user in the database
+    // We search by 'oldusername' because that is the one currently in the session
+    await User.updateOne({ username: oldusername }, { $set: ndata })
 
+    return { success: true }
 }
 
-    let updated = await User.updateOne({email: ndata.email}, { $set: ndata })
-    console.log(updated)
-  
-}
 
-export default initiate
 
 
