@@ -107,7 +107,7 @@ const PaymentPage = ({ username }) => {
                                 <li key={i} className='my-4 flex gap-2 items-center'>
                                     <img className='rounded-full p-1' src="/pro.gif" width={42} height={42} alt="" />
                                     <span>
-                                        {p.name} <span className='font-bold text-green-500'>₹{p.amount}</span> with a message "{p.message}"
+                                        {p.name} <span className='font-bold text-green-500'>₹{p.amount}</span> with a message {p.message}
                                     </span>
                                 </li>
                             ))}
