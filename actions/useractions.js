@@ -3,9 +3,42 @@ import Razorpay from "razorpay"  // by npm i razorpay
 import Payment from "@/models/Payment"
 import connectDb from "@/db/connectDB"
 import User from "@/models/User"
+import crypto from "crypto" 
 
+export const validatePayment = async (razorpay_payment_id, razorpay_order_id, razorpay_signature) => {
+    await connectDb()
 
+    // 1. Create the string that Razorpay expects: order_id + "|" + payment_id
+    let body = razorpay_order_id + "|" + razorpay_payment_id
 
+    // 2. Generate the expected signature using your SECRET KEY
+    const expectedSignature = crypto
+        .createHmac("sha256", process.env.KEY_SECRET)
+        .update(body.toString())
+        .digest("hex")
+
+    // 3. Compare the signature Razorpay sent vs. the one you generated
+    const isAuthentic = expectedSignature === razorpay_signature
+
+    if (isAuthentic) {
+        // Payment is Real! Update the database
+        // Find the payment by Order ID and mark it as done
+        const updatedPayment = await Payment.findOneAndUpdate(
+            { orderID: razorpay_order_id },
+            { 
+                $set: { 
+                    done: true, 
+                    paymentID: razorpay_payment_id 
+                } 
+            },
+            { new: true }
+        )
+        return { success: true }
+    } else {
+        // Signatures didn't match - Potential Hack
+        return { success: false, error: "Payment verification failed" }
+    }
+}
 export const initiate = async (amount, to_user, paymentform) => {
     await connectDb()
     
