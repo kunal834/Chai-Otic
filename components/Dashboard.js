@@ -44,8 +44,7 @@ const Dashboard = () => {
             name: form.name,
             username: form.username,
             profilepic: form.profilepic,
-            razorpayid: form.razorpayid,
-            razorpaysecret: form.razorpaysecret,
+    
         }
 
         try {
@@ -101,17 +100,7 @@ const Dashboard = () => {
                     <input value={form.profilepic || ""} onChange={handleChange} type="text" name='profilepic' id="profilepic" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs" />
                 </div>
 
-                {/* RAZORPAY KEY */}
-                <div className="my-2">
-                    <label htmlFor="razorpayid" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Razorpay ID</label>
-                    <input value={form.razorpayid || ""} onChange={handleChange} type="text" name='razorpayid' id="razorpayid" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs" />
-                </div>
-
-                {/* RAZORPAY SECRET */}
-                <div className="my-2">
-                    <label htmlFor="razorpaysecret" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Razorpay Secret</label>
-                    <input value={form.razorpaysecret || ""} onChange={handleChange} type="password" name='razorpaysecret' id="razorpaysecret" className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs" />
-                </div>
+                
 
                 <div className="my-6">
                     <button type="submit" className="block w-full p-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 font-medium text-sm">Save Profile</button>
