@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth'
-import GitHubProvider from "next-auth/providers/github";
+import GitHubProvider  from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google"
 import connectDb from '@/db/connectDB';
 import User from '@/models/User';
 
@@ -9,6 +10,10 @@ export const authoptions = {
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET
+    }),
   ],
   
   // Make sure to use a secret for NextAuth itself (required for production)
@@ -16,7 +21,7 @@ export const authoptions = {
 
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      if (account.provider == "github") {
+      if (account.provider == "github" || account.provider == "google") {
         await connectDb()
 
         // Check if user exists

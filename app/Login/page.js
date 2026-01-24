@@ -26,7 +26,7 @@ const Login = () => {
 
        <div className='flex flex-col gap-2 min-h-screen p-10 '>
         <div className=' flex justify-center '>
-            <button className='bg-white text-black p-2 px-10 flex gap-2 justify-center rounded-2xl '> <img src="/gog.gif" alt="" width={44} height={44}/>continue with google </button>   
+            <button onClick={ () => signIn("google")}   className='bg-white text-black p-2 px-10 flex gap-2 justify-center rounded-2xl '> <img src="/gog.gif" alt="" width={44} height={44}/>continue with google </button>   
 
         </div>
         <div className=' flex justify-center '>
