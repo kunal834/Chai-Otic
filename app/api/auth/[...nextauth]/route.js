@@ -12,7 +12,11 @@ export const authoptions = {
     }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      // Add this block to allow more time
+  httpOptions: {
+    timeout: 10000, // Wait up to 10 seconds instead of 3.5
+  }
     }),
   ],
   
